@@ -1,0 +1,274 @@
+SeqList.h
+
+#pragma once
+
+#include<stdio.h>
+#include<assert.h>
+#include<stdlib.h>
+
+typedef int SLDataType;
+
+typedef struct SeqList
+{
+	int* array;
+	size_t _size;
+	size_t capacity;
+}SeqList;
+
+void SeqListInit(SeqList* ps);
+void SeqListDestory(SeqList* ps);
+void SeqListPrint(SeqList* ps);
+void SeqListCheckCapacity(SeqList* ps);
+
+void SeqListPushBack(SeqList* ps, SLDataType x);
+void SeqListPopBack(SeqList* ps);
+void SeqListPushFront(SeqList* ps, SLDataType x);
+void SeqListPopFront(SeqList* ps);
+
+int SeqListFind(SeqList* ps, SLDataType x);
+void SeqListInsert(SeqList* ps,size_t pos, SLDataType x);
+void SeqListEarse(SeqList* ps,size_t pos);
+void SeqListRemove(SeqList* ps, SLDataType x);
+
+void SeqListBubbleSort(SeqList* ps);
+int SeqListBinaryFind(SeqList* ps, SLDataType x);
+// 本题要求：时间复杂度：O(N) 空间复杂度 O(1)
+void SeqListRemoveAll(SeqList* ps, SLDataType x);
+
+
+SeqList.c
+
+#include "SeqList.h"
+
+void SeqListInit(SeqList* ps)//初始化
+{
+	assert(ps);
+	ps->array = NULL;
+	ps->_size = 0;
+	ps->capacity = 0;
+}
+
+void SeqListDestory(SeqList* ps)//释放
+{
+	assert(ps);
+	free(ps->array);
+	ps->array = NULL;
+	ps->_size = ps->capacity = 0;
+}
+void SeqListPrint(SeqList* ps)//打印
+{
+	assert(ps);
+	for (size_t i = 0; i < ps->_size; ++i)
+	{
+		printf("%d ", ps->array[i]);
+	}
+	printf("\n");
+}
+void SeqListCheckCapacity(SeqList* ps)//检查容量
+{
+	if (ps->_size >= ps->capacity)
+	{
+		size_t newcapacity = ps->capacity == 0 ? 4:ps->capacity *2;
+		ps->array = realloc(ps->array, newcapacity  * sizeof(SLDataType));
+		ps->capacity = newcapacity;
+	}
+}
+
+void SeqListPushBack(SeqList* ps, SLDataType x)//尾插
+{
+	assert(ps);
+	SeqListCheckCapacity(ps);
+	ps->array[ps->_size] = x;
+	ps->_size++;
+}
+
+void SeqListPopBack(SeqList* ps)//尾删
+{
+	assert(ps && ps->_size>0);
+	ps->_size--;
+}
+
+void SeqListPushFront(SeqList* ps, SLDataType x)//头插
+{
+	assert(ps);
+	SeqListCheckCapacity(ps);//检查空间
+	int end = ps->_size - 1;
+	for (; end>=0; --end)//从后往前挪
+	{
+		ps->array[end + 1] = ps->array[end];
+	}
+	ps->array[0] = x;
+	ps->_size++;
+}
+
+void SeqListPopFront(SeqList* ps)//头删
+{
+	assert(ps&&ps->_size);
+	for (size_t i = 0; i < ps->_size;++i)
+	{
+		ps->array[i] = ps->array[i + 1];
+	}
+	ps->_size--;
+}
+
+int SeqListFind(SeqList* ps, SLDataType x)//查找
+{
+	assert(ps);
+	for (size_t i = 0; i < ps->_size; ++i)
+	{
+		if (ps->array[i] == x)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+void SeqListInsert(SeqList* ps, size_t pos, SLDataType x)//中间插入
+{
+	assert(ps && pos< ps->_size);
+	SeqListCheckCapacity(ps);
+	size_t end = ps->_size;
+	while (end > pos)
+	{
+		ps->array[end] = ps->array[end-1];
+		--end;
+	}
+	ps->array[pos] = x;
+	ps->_size++;
+}
+void SeqListEarse(SeqList* ps, size_t pos)//中间删除
+{
+	assert(ps && pos<ps->_size);
+	for (size_t i = pos; i <= ps->_size; ++i)
+	{
+		ps->array[i] = ps->array[i + 1];
+	}
+	ps->_size--;
+}
+
+void SeqListRemove(SeqList* ps, SLDataType x)//删除当前位置
+{
+	assert(ps);
+	int pos = SeqListFind(ps, x);
+	if (pos >= 0)
+	{
+		SeqListEarse(ps,pos);
+	}
+}
+void SeqListBubbleSort(SeqList* ps)//冒泡排序
+{
+	assert(ps);
+	for (size_t end = ps->_size; end > 0; --end)//冒泡结束的位置
+	{
+		int exchange = 0;
+		for (size_t i = 1; i < end; ++i)//单趟冒泡
+		{
+			if ( ps->array[i-1] > ps->array[i])
+			{
+				SLDataType tmp = ps->array[i];
+				ps->array[i] = ps->array[i-1];
+				ps->array[i-1] = tmp;
+				exchange = 1;
+			}
+		}
+		if (exchange == 0)//exchange == 0说明第一趟没有发生过交换
+		{
+			break;
+		}
+	}
+}
+int SeqListBinaryFind(SeqList* ps, SLDataType x)//二分查找
+{
+	size_t begin = 0;
+	size_t end = ps->_size;
+	while (begin < end)
+	{
+		size_t mid = (begin + end) / 2;
+		if (ps -> array[ mid ]== x)
+		{
+			return mid;
+		}
+		if (ps-> array[mid] <x)
+		{
+			begin = mid + 1;
+		}
+		else
+		{
+			end = mid;
+		}
+	}
+	return -1;
+}
+// 本题要求：时间复杂度：O(N) 空间复杂度 O(1)
+void SeqListRemoveAll(SeqList* ps, SLDataType x)//删除当前位置和位置后的所有
+{
+	assert(ps);
+	int pos = SeqListFind(ps, x);
+	for (size_t i=ps->_size; i>pos; --i)
+	{
+		ps->_size--;
+	}
+}
+
+
+test.c
+
+#include "SeqList.h"
+
+void Test_SeqList1()
+{
+	SeqList s;
+	SeqListInit(&s);
+	SeqListPushBack(&s, 1);
+	SeqListPushBack(&s, 2);
+	SeqListPushBack(&s, 3);
+	SeqListPushBack(&s, 4);
+	SeqListPushBack(&s, 5);
+	SeqListPrint(&s);
+
+	SeqListPopBack(&s);
+	SeqListPrint(&s);
+	SeqListPushFront(&s, 0);
+	SeqListPrint(&s);
+	SeqListPopFront(&s);
+	SeqListPrint(&s);
+
+	SeqListInsert(&s, 0, 70);
+	SeqListPrint(&s);
+	SeqListEarse(&s, 0);
+	SeqListPrint(&s);
+}
+void Test_SeqList2()
+{
+	SeqList s;
+	SeqListInit(&s);
+	SeqListPushBack(&s, 3);
+	SeqListPushBack(&s,0);
+	SeqListPushBack(&s,4);
+	SeqListPushBack(&s,2);
+	SeqListPushBack(&s,5);
+	SeqListPushBack(&s,1);
+	SeqListPrint(&s);
+
+	SeqListBubbleSort(&s);
+    SeqListPrint(&s);
+
+	printf("%d\n", SeqListBinaryFind(&s, 0));
+	printf("%d\n", SeqListBinaryFind(&s, 1));
+	printf("%d\n", SeqListBinaryFind(&s, 2));
+	printf("%d\n", SeqListBinaryFind(&s, 3));
+	printf("%d\n", SeqListBinaryFind(&s, 4));
+	printf("%d\n", SeqListBinaryFind(&s, 5));
+	printf("%d\n", SeqListBinaryFind(&s, 6));
+
+	SeqListRemoveAll(&s,0);
+	SeqListPrint(&s);
+}
+int main()
+{
+	Test_SeqList2();
+	return 0;
+}
+
+
+
